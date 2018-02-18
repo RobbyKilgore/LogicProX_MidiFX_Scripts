@@ -41,7 +41,6 @@ var divisionBeats = [
     ];
 var SUBDIVISIONS = divisionBeats[1]; // Change the basic subdivision. Indexed from devisionBeats array (above)
 
-
 // INITS
 ResetParameterDefaults = true;
 var PluginParameters = [];
@@ -76,6 +75,9 @@ var pentaSteps = [3,2,3,2,2];
 var stepPlayed = false;
 var nextBeat = 1;
 var count = 0;
+
+
+// ---- MIDI PROCESS LOOP ---- //
 function ProcessMIDI() {
 
     var musicInfo = GetTimingInfo();    
@@ -92,62 +94,80 @@ function ProcessMIDI() {
 				
 				// THINGS HAPPEN HERE
 				for (var i = 0; i < NUMBER_OF_VOICES; i++) {
+
 					if ((count + OFFSET[i]) % PLAY_EVERY[i] == 0){
+
 						playNote(MIDI_NOTE[i], VELOCITY[i], ROOT_PROBABILITY[i], 100, NOTE_RANGE[i], MODALITY[i]);			
+
 					}else{
+
 						playNote(MIDI_NOTE[i], FILL_VELOCITY[i], ROOT_PROBABILITY[i], FILL_PROBABILITY[i], NOTE_RANGE[i], MODALITY[i]);
+
 					}
+
 				}
 
 				// Advance to the next step
 				nextBeat = (nextBeat + SUBDIVISIONS);
 				count += 1;
 				stepPlayed = true;
+
 			}
 
 			// Holding for next sequence event
 			if (nextBeat >= musicInfo.blockStartBeat && nextBeat < musicInfo.blockEndBeat){
+
 				stepPlayed = false;
+
 			}
 
 		}else{
+
 			// STOPPED - reset midi and counters
 			MIDI.allNotesOff();
 			nextBeat = 1;
 			count = 0;
+
 		}
 }
 
 
 function playNote(note,vel,Rprob,Fprob,range,modality){
+
 	var rnd = Math.floor(Math.random() * 100);
-	//Trace(note +" "+vel+" "+prob+" "+range+" "+modality);
 	var notes = buildScale(note,range,modality);
 	var rndNoteIndex = Math.floor(Math.random() * notes.length);
 	var rndRoot = Math.floor(Math.random() * 100);
 	var rndFill = Math.floor(Math.random() * 100);
+
 	if (Rprob > rndRoot){
+
 		_note = note;
+
 	}else{
+
 		_note = notes[rndNoteIndex];
+
 	}
+
 	if (Fprob > rnd){
+
 		var noteOn = new NoteOn();
 		noteOn.pitch = _note;
 		noteOn.velocity = vel;
 		noteOn.send();				
 		var noteOff = new NoteOff(noteOn);
 		noteOff.sendAtBeat(nextBeat + SUBDIVISIONS/1.25);
+
 	}
 }
 
 
 function ParameterChanged(param, value) {
 
-  	// which voice is it?
+  	// Which voice index is it?
 	var voiceIndex = parseInt((param % 10 == 0) ? param / 10 : (param - 1) / 10);
-  // if it's the slider you just created
-  // Trace(voiceIndex +" "+ param +" "+ value); // print the value to the console
+
 	switch (param % 10) {
 
   		case 1:
@@ -170,7 +190,7 @@ function ParameterChanged(param, value) {
   			ROOT_PROBABILITY[voiceIndex] = value;
   			break;
 
-   	case 6:
+   		case 6:
   			VELOCITY[voiceIndex] = value;
   			break;
 
@@ -194,7 +214,9 @@ function ParameterChanged(param, value) {
 
 // BUILD PARAMETER CONTROLS
 for (var i = 0; i < NUMBER_OF_VOICES; i++) {
+
 	var voiceNumber = i + 1;
+
 	PluginParameters.push({name:"===== MIDIBOT #" + (i+1) + " =====", type:"text"});
 			
 	PluginParameters.push({name:"Midi Note", type:"menu", 
@@ -232,22 +254,33 @@ for (var i = 0; i < NUMBER_OF_VOICES; i++) {
 		numberOfSteps:127, defaultValue:100});
 
 }
+
+// Build scale for available notes
 function buildScale(root,range,modality){
+
 	var maxCount = range + modality;
 	var first = true;
 	var availableNotes = [];
 
 	for (i=modality;i<maxCount;i++){
+
 		if (first == true){
+
 			availableNotes.push(root);
 			first = false;
-    }else{
-        if (modality<7){
-            availableNotes.push(availableNotes[(i-modality)-1] + modalSteps[(i-1)%7]);
-        }else{
-            availableNotes.push(availableNotes[(i-modality)-1] + pentaSteps[(i-1)%5]);
-        }  
-    }    
+
+    	}else{
+
+        	if (modality<7){
+
+            	availableNotes.push(availableNotes[(i-modality)-1] + modalSteps[(i-1)%7]);
+
+        	}else{
+
+            	availableNotes.push(availableNotes[(i-modality)-1] + pentaSteps[(i-1)%5]);
+
+        	}  
+    	}    
 	}
 	return availableNotes;
 }
