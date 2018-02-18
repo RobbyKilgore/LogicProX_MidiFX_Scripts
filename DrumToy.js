@@ -31,6 +31,7 @@
 // USER CAN ADJUST THESE VALUES
 var PATTERN_LENGTH = 16;
 var NUMBER_OF_VOICES = 1;
+
 // RYTHMIC INITIALIZATION
 var divisionBeats = [
         .166, .25, .375,  // 1/16t, 1/16, 1/16d
