@@ -8,3 +8,4 @@ Rotator
 A midi input processor that rotates among various programmable harmonies.
 
 midirotator on gmail.
+Robby Kilgore - Feb 2018
