@@ -4,15 +4,15 @@
 //		A Logic/MainStage MIDI FX 'Scripter' hack
 //		robbykilgore.com
 //		midirotator@gmail.com
-//
-//
-//
-//		PATTERN_LENGTH:		The number of steps in the sequence (see code)
+//		
 //		NUMBER_OF_VOICES:	Number of concurrent MidiBot voices (see code)
-//		SUBDIVISIONS:		The number of subdivisions
-//							Defaults to "16th" (Indexed toe divisionBeats array)
 //
-//		THE PARAMETERS
+//		THE GLOBAL PARAMETERS
+//		---------------------------------------------------------------
+//		Sequence Length:		The number of steps in the sequence
+//		Clock Divisions:		The number of subdivisions
+//
+//		VOICE PARAMETERS
 //		---------------------------------------------------------------
 //		Midi Note: The Root
 //		Modality: Scale or Mode
@@ -29,10 +29,15 @@
 //-----------------------------------------------------------------------------
 
 // USER CAN ADJUST THESE VALUES
-var PATTERN_LENGTH = 16;
-var NUMBER_OF_VOICES = 1;
+var NUMBER_OF_VOICES = 1; // 1, 2, or 3 voices only
+
 
 // RYTHMIC INITIALIZATION
+var divisionLabels = [
+				"1/16t", "1/16", "1/16d",
+				"1/8t", "1/8", "1/8d",
+				"1/2t", "1/2", "1/2d"
+		];	
 var divisionBeats = [
         .166, .25, .375,  // 1/16t, 1/16, 1/16d
         .333, .5, .75,    // 1/8t, 1/8, 1/8d
@@ -40,6 +45,7 @@ var divisionBeats = [
         1.333, 2, 3       // 1/2t, 1/2, 1/2d
     ];
 var SUBDIVISIONS = divisionBeats[1]; // Change the basic subdivision. Indexed from devisionBeats array (above)
+
 
 // INITS
 ResetParameterDefaults = true;
@@ -54,6 +60,8 @@ var VELOCITY = [];
 var OFFSET = [];
 var FILL_PROBABILITY = [];
 var FILL_VELOCITY = [];
+var PATTERN_LENGTH = 16;
+
 
 // HARMONIC INITIALIZATION
 var ROOT_NOTES = ["C-2", "C#-2", "D-2", "D#-2", "E-2", "F-2", "F#-2", "G-2", "G#-2", "A-2", "A#-2", "B-2",
@@ -71,13 +79,14 @@ var MODE_LIST = ["Ionian","Dorian","Phrygian","Lydian","Mixolydian","Aolian","Lo
 var modalSteps = [2,2,1,2,2,2,1];
 var pentaSteps = [3,2,3,2,2];
 
+
 // MISC INITS
 var stepPlayed = false;
 var nextBeat = 1;
 var count = 0;
 
 
-// ---- MIDI PROCESS LOOP ---- //
+// PROCESS MIDI - MAIN LOOP
 function ProcessMIDI() {
 
     var musicInfo = GetTimingInfo();    
@@ -94,48 +103,38 @@ function ProcessMIDI() {
 				
 				// THINGS HAPPEN HERE
 				for (var i = 0; i < NUMBER_OF_VOICES; i++) {
-
 					if ((count + OFFSET[i]) % PLAY_EVERY[i] == 0){
-
 						playNote(MIDI_NOTE[i], VELOCITY[i], ROOT_PROBABILITY[i], 100, NOTE_RANGE[i], MODALITY[i]);			
-
 					}else{
-
 						playNote(MIDI_NOTE[i], FILL_VELOCITY[i], ROOT_PROBABILITY[i], FILL_PROBABILITY[i], NOTE_RANGE[i], MODALITY[i]);
-
 					}
-
 				}
 
 				// Advance to the next step
 				nextBeat = (nextBeat + SUBDIVISIONS);
 				count += 1;
 				stepPlayed = true;
-
 			}
 
 			// Holding for next sequence event
 			if (nextBeat >= musicInfo.blockStartBeat && nextBeat < musicInfo.blockEndBeat){
-
 				stepPlayed = false;
-
 			}
 
 		}else{
-
 			// STOPPED - reset midi and counters
 			MIDI.allNotesOff();
 			nextBeat = 1;
 			count = 0;
-
 		}
 }
 
 
+// CALCULATE AND PLAY THE RIGHT NOTES
 function playNote(note,vel,Rprob,Fprob,range,modality){
 
-	var rnd = Math.floor(Math.random() * 100);
 	var notes = buildScale(note,range,modality);
+	var rnd = Math.floor(Math.random() * 100);
 	var rndNoteIndex = Math.floor(Math.random() * notes.length);
 	var rndRoot = Math.floor(Math.random() * 100);
 	var rndFill = Math.floor(Math.random() * 100);
@@ -156,67 +155,109 @@ function playNote(note,vel,Rprob,Fprob,range,modality){
 		noteOn.pitch = _note;
 		noteOn.velocity = vel;
 		noteOn.send();				
+
 		var noteOff = new NoteOff(noteOn);
-		noteOff.sendAtBeat(nextBeat + SUBDIVISIONS/1.25);
+		noteOff.sendAtBeat(nextBeat + SUBDIVISIONS/2);
 
 	}
 }
 
-
+// 
 function ParameterChanged(param, value) {
 
-  	// Which voice index is it?
-	var voiceIndex = parseInt((param % 10 == 0) ? param / 10 : (param - 1) / 10);
+	if (param>11 && param <=22){
 
-	switch (param % 10) {
+		param = param + 2;
 
-  		case 1:
+	}else if(param > 22){
+
+		param = param + 4;
+	}
+
+  	// which voice is it?
+	var voiceIndex = parseInt((param % 12 == 0) ? param / 12 : (param - 1) / 12);
+
+  switch (param % 12) {
+
+		case 0:
+
+			PATTERN_LENGTH = value;
+			break;
+
+		case 1:
+
+			SUBDIVISIONS = divisionBeats[value];
+			break;
+
+		case 2:
+
+			break;
+			
+  		case 3:
+
   			MIDI_NOTE[voiceIndex] = value;
   			break;
 
-  		case 2:
+  		case 4:
+
   			MODALITY[voiceIndex] = value;
   			break;
 
-  		case 3:
+  		case 5:
+
   			NOTE_RANGE[voiceIndex] = value;
   			break;
 
-  		case 4:
+  		case 6:
+
   			PLAY_EVERY[voiceIndex] = value;
   			break;
 
-  		case 5:
+  		case 7:
+
   			ROOT_PROBABILITY[voiceIndex] = value;
   			break;
 
-   		case 6:
+   	case 8:
+
   			VELOCITY[voiceIndex] = value;
   			break;
 
-  		case 7:
+  		case 9:
+
   	  		OFFSET[voiceIndex] = value;
 			break;
 
-  		case 8:
+  		case 10:
+
   			FILL_PROBABILITY[voiceIndex] = value;
   			break;
 
-  		case 9:
+  		case 11:
+
   			FILL_VELOCITY[voiceIndex] = value;
   			break;
 
  		default:
     		break;
-	}
+
+	}	
 }
 
 
-// BUILD PARAMETER CONTROLS
+// BUILD GUI CONTROLS
+
+// Global Controls
+PluginParameters.push({name:"Sequence Length", type:"linear",
+		minValue:1, maxValue:32, 
+		numberOfSteps:31, defaultValue:16});
+
+PluginParameters.push({name:"Clock Divisions", type:"menu", 
+		valueStrings:divisionLabels, defaultValue:1});
+
+// Voice Controls
 for (var i = 0; i < NUMBER_OF_VOICES; i++) {
-
 	var voiceNumber = i + 1;
-
 	PluginParameters.push({name:"===== MIDIBOT #" + (i+1) + " =====", type:"text"});
 			
 	PluginParameters.push({name:"Midi Note", type:"menu", 
@@ -255,7 +296,7 @@ for (var i = 0; i < NUMBER_OF_VOICES; i++) {
 
 }
 
-// Build scale for available notes
+// CREATE HARMONIC CONTENT
 function buildScale(root,range,modality){
 
 	var maxCount = range + modality;
@@ -269,15 +310,15 @@ function buildScale(root,range,modality){
 			availableNotes.push(root);
 			first = false;
 
-    	}else{
+	    }else{
 
-        	if (modality<7){
+       		if (modality<7){
 
-            	availableNotes.push(availableNotes[(i-modality)-1] + modalSteps[(i-1)%7]);
+	            availableNotes.push(availableNotes[(i-modality)-1] + modalSteps[(i-1)%7]);
 
-        	}else{
+    	    }else{
 
-            	availableNotes.push(availableNotes[(i-modality)-1] + pentaSteps[(i-1)%5]);
+        	    availableNotes.push(availableNotes[(i-modality)-1] + pentaSteps[(i-1)%5]);
 
         	}  
     	}    
