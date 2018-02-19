@@ -218,7 +218,7 @@ function ParameterChanged(param, value) {
   			ROOT_PROBABILITY[voiceIndex] = value;
   			break;
 
-   	case 8:
+   		case 8:
 
   			VELOCITY[voiceIndex] = value;
   			break;
