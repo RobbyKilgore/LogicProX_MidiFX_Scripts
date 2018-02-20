@@ -7,7 +7,7 @@ This script can trigger midi notes with randomization, various modalities, and o
 MidiRotator
 A midi input processor that rotates among various programmable harmonies. Originally created for Michael Brecker using a trick on the Oberheim X-Pander. This version is a script for Logic Pro X / Main Stage 3 MidiFX Scripter module.
 
-ContactL midirotator via gmail.
+Contact: midirotator via gmail.
 
 Have Fun,
 Robby Kilgore - Feb 2018
