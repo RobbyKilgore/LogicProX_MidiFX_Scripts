@@ -225,7 +225,7 @@ function ParameterChanged(param, value) {
   			ROOT_PROBABILITY[voiceIndex] = value;
   			break;
 
-   	case 8:
+   		case 8:
 
   			VELOCITY[voiceIndex] = value;
   			break;
@@ -327,17 +327,17 @@ function buildScale(root,range,modality){
 
         	    availableNotes.push(availableNotes[(i-modality)-1] + pentaSteps[(i-1)%5]);
 
-    	    }else if(modality == 9) {
+			}else if(modality == 9) {
 
-        	    availableNotes.push(availableNotes[(i-modality)-1] + chromatic[(i-1)%12]);
+				availableNotes.push(availableNotes[(i-modality)-1] + chromatic[(i-1)%12]);
 
 			}else if(modality >= 10 && modality < 17) {
 
-        	    availableNotes.push(availableNotes[(i-modality)-1] + minorMajor[(i-1)%7]);
+				availableNotes.push(availableNotes[(i-modality)-1] + minorMajor[(i-1)%7]);
 
 			}else if(modality == 17) {
 
-        	    availableNotes.push(availableNotes[(i-modality)-1] + fifths[(i-1)%2]);
+				availableNotes.push(availableNotes[(i-modality)-1] + fifths[(i-1)%2]);
 
         	}  
     	}    
