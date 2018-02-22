@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // 		MidiBot ===================  21-FEB-2018
-//		Build: 1.01
+//		Build: 1.03
 //
 //		A Logic/MainStage MIDI FX 'Scripter' hack
 //		robbykilgore.com
@@ -246,7 +246,7 @@ function ParameterChanged(param, value) {
 			break;
 
 		default:
-		
+
 			break;
 
 	}	
