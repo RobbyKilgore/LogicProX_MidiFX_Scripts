@@ -1,5 +1,6 @@
 //-----------------------------------------------------------------------------
-// MidiBot ===================  18-FEB-2018
+// 		MidiBot ===================  21-FEB-2018
+//		Build: 1.01
 //
 //		A Logic/MainStage MIDI FX 'Scripter' hack
 //		robbykilgore.com
@@ -75,9 +76,15 @@ var ROOT_NOTES = ["C-2", "C#-2", "D-2", "D#-2", "E-2", "F-2", "F#-2", "G-2", "G#
 					"C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6",
 					"C7", "C#7", "D7", "D#7", "E7", "F7", "F#7", "G7", "G#7", "A7", "A#7", "B7",
 					"C8", "C#8", "D8", "D#8", "E8", "F8", "F#8", "G8" ];
-var MODE_LIST = ["Ionian","Dorian","Phrygian","Lydian","Mixolydian","Aolian","Locrian","Pentatonic Minor","Pentatonic Major"]
+
 var modalSteps = [2,2,1,2,2,2,1];
 var pentaSteps = [3,2,3,2,2];
+var chromatic = [1,1,1,1,1,1,1,1,1,1,1,1];
+var minorMajor = [2,2,1,2,1,2,2];
+var fifths = [7,5];
+var MODE_LIST = ["Ionian","Dorian","Phrygian","Lydian","Mixolydian","Aolian","Locrian",
+				"Pentatonic Minor","Pentatonic Major",
+				"Chromatic","Harmonic Minor","Dorian b9","Lydian #5", "Lydian Dominant", "Mixolydian b13", "Aolian b5","Augmented", "Fifths"]
 
 
 // MISC INITS
@@ -218,7 +225,7 @@ function ParameterChanged(param, value) {
   			ROOT_PROBABILITY[voiceIndex] = value;
   			break;
 
-   		case 8:
+   	case 8:
 
   			VELOCITY[voiceIndex] = value;
   			break;
@@ -268,7 +275,7 @@ for (var i = 0; i < NUMBER_OF_VOICES; i++) {
 
 	PluginParameters.push({name:"Note Range", type:"linear",
 		minValue:1, maxValue:24, 
-		numberOfSteps:23, defaultValue:7});
+		numberOfSteps:23, defaultValue:1});
 
 	PluginParameters.push({name:"Play Every", type:"linear",
 		minValue:1, maxValue:32, 
@@ -276,11 +283,11 @@ for (var i = 0; i < NUMBER_OF_VOICES; i++) {
 		
 	PluginParameters.push({name:"Root Probability", type:"%",
 		minValue:0, maxValue:100, 
-		numberOfSteps:100, defaultValue:33});
+		numberOfSteps:100, defaultValue:0});
 		
 	PluginParameters.push({name:"Velocity", type:"linear",
 		minValue:0, maxValue:127, 
-		numberOfSteps:127, defaultValue:127});
+		numberOfSteps:127, defaultValue:111});
 		
 	PluginParameters.push({name:"Offset", type:"linear",
 		minValue:0, maxValue:16, 
@@ -288,11 +295,11 @@ for (var i = 0; i < NUMBER_OF_VOICES; i++) {
 
 	PluginParameters.push({name:"Fill Probability", type:"%",
 		minValue:0, maxValue:100, 
-		numberOfSteps:100, defaultValue:33});
+		numberOfSteps:100, defaultValue:0});
 		
 	PluginParameters.push({name:"Fill Velocity", type:"linear",
 		minValue:0, maxValue:127, 
-		numberOfSteps:127, defaultValue:100});
+		numberOfSteps:127, defaultValue:75});
 
 }
 
@@ -312,13 +319,25 @@ function buildScale(root,range,modality){
 
 	    }else{
 
-       		if (modality<7){
+       	if (modality<7){
 
 	            availableNotes.push(availableNotes[(i-modality)-1] + modalSteps[(i-1)%7]);
 
-    	    }else{
+    	    }else if(modality >= 7 && modality < 9) {
 
         	    availableNotes.push(availableNotes[(i-modality)-1] + pentaSteps[(i-1)%5]);
+
+    	    }else if(modality == 9) {
+
+        	    availableNotes.push(availableNotes[(i-modality)-1] + chromatic[(i-1)%12]);
+
+			}else if(modality >= 10 && modality < 17) {
+
+        	    availableNotes.push(availableNotes[(i-modality)-1] + minorMajor[(i-1)%7]);
+
+			}else if(modality == 17) {
+
+        	    availableNotes.push(availableNotes[(i-modality)-1] + fifths[(i-1)%2]);
 
         	}  
     	}    
