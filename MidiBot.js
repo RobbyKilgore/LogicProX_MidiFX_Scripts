@@ -40,11 +40,11 @@ var divisionLabels = [
 				"1/2t", "1/2", "1/2d"
 		];	
 var divisionBeats = [
-        .166, .25, .375,  // 1/16t, 1/16, 1/16d
-        .333, .5, .75,    // 1/8t, 1/8, 1/8d
-        .666, 1, 1.5,     // 1/4t, 1/4, 1/4d
-        1.333, 2, 3       // 1/2t, 1/2, 1/2d
-    ];
+		.166, .25, .375,  // 1/16t, 1/16, 1/16d
+		.333, .5, .75,    // 1/8t, 1/8, 1/8d
+		.666, 1, 1.5,     // 1/4t, 1/4, 1/4d
+		1.333, 2, 3       // 1/2t, 1/2, 1/2d
+	];
 var SUBDIVISIONS = divisionBeats[1]; // Change the basic subdivision. Indexed from devisionBeats array (above)
 
 
@@ -96,14 +96,14 @@ var count = 0;
 // PROCESS MIDI - MAIN LOOP
 function ProcessMIDI() {
 
-    var musicInfo = GetTimingInfo();    
+	var musicInfo = GetTimingInfo();    
 
 	  if (musicInfo.playing) {
 
-	  		// LOOP LENGTH
-	  		if (count > PATTERN_LENGTH - 1) {
-	  			count = 0;
-	  		} 
+			// LOOP LENGTH
+			if (count > PATTERN_LENGTH - 1) {
+				count = 0;
+			} 
 	  
 			// For each step in the sequence
 			if (!stepPlayed){
@@ -181,7 +181,7 @@ function ParameterChanged(param, value) {
 		param = param + 4;
 	}
 
-  	// which voice is it?
+	// which voice is it?
 	var voiceIndex = parseInt((param % 12 == 0) ? param / 12 : (param - 1) / 12);
 
   switch (param % 12) {
@@ -200,53 +200,54 @@ function ParameterChanged(param, value) {
 
 			break;
 			
-  		case 3:
+		case 3:
 
-  			MIDI_NOTE[voiceIndex] = value;
-  			break;
-
-  		case 4:
-
-  			MODALITY[voiceIndex] = value;
-  			break;
-
-  		case 5:
-
-  			NOTE_RANGE[voiceIndex] = value;
-  			break;
-
-  		case 6:
-
-  			PLAY_EVERY[voiceIndex] = value;
-  			break;
-
-  		case 7:
-
-  			ROOT_PROBABILITY[voiceIndex] = value;
-  			break;
-
-   		case 8:
-
-  			VELOCITY[voiceIndex] = value;
-  			break;
-
-  		case 9:
-
-  	  		OFFSET[voiceIndex] = value;
+			MIDI_NOTE[voiceIndex] = value;
 			break;
 
-  		case 10:
+		case 4:
 
-  			FILL_PROBABILITY[voiceIndex] = value;
-  			break;
+			MODALITY[voiceIndex] = value;
+			break;
 
-  		case 11:
+		case 5:
 
-  			FILL_VELOCITY[voiceIndex] = value;
-  			break;
+			NOTE_RANGE[voiceIndex] = value;
+			break;
 
- 		default:
-    		break;
+		case 6:
+
+			PLAY_EVERY[voiceIndex] = value;
+			break;
+
+		case 7:
+
+			ROOT_PROBABILITY[voiceIndex] = value;
+			break;
+
+		case 8:
+
+			VELOCITY[voiceIndex] = value;
+			break;
+
+		case 9:
+
+			OFFSET[voiceIndex] = value;
+			break;
+
+		case 10:
+
+			FILL_PROBABILITY[voiceIndex] = value;
+			break;
+
+		case 11:
+
+			FILL_VELOCITY[voiceIndex] = value;
+			break;
+
+		default:
+		
+			break;
 
 	}	
 }
@@ -317,15 +318,15 @@ function buildScale(root,range,modality){
 			availableNotes.push(root);
 			first = false;
 
-	    }else{
+		}else{
 
-       	if (modality<7){
+			if (modality<7){
 
-	            availableNotes.push(availableNotes[(i-modality)-1] + modalSteps[(i-1)%7]);
+				availableNotes.push(availableNotes[(i-modality)-1] + modalSteps[(i-1)%7]);
 
-    	    }else if(modality >= 7 && modality < 9) {
+			}else if(modality >= 7 && modality < 9) {
 
-        	    availableNotes.push(availableNotes[(i-modality)-1] + pentaSteps[(i-1)%5]);
+				availableNotes.push(availableNotes[(i-modality)-1] + pentaSteps[(i-1)%5]);
 
 			}else if(modality == 9) {
 
@@ -339,8 +340,8 @@ function buildScale(root,range,modality){
 
 				availableNotes.push(availableNotes[(i-modality)-1] + fifths[(i-1)%2]);
 
-        	}  
-    	}    
+			}  
+		}    
 	}
 	return availableNotes;
 }
