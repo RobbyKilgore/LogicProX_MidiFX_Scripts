@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // 	MidiBot ===================  24-FEB-2018
-//		Build: 1.05
+//		Build: 1.06
 //
 //		A Logic/MainStage MIDI FX 'Scripter' hack
 //		robbykilgore.com
@@ -95,7 +95,7 @@ var MODE_LIST = ["Ionian","Dorian","Phrygian","Lydian","Mixolydian","Aolian","Lo
 // MISC INITS
 var stepPlayed = false;
 var nextBeat = 1;
-var count = 0;
+var count = 1000;
 
 
 // RESET
@@ -126,6 +126,9 @@ function ProcessMIDI() {
 
 			// LOOP LENGTH
 			if (count > PATTERN_LENGTH - 1) {
+				if (count==1000){
+					nextBeat = musicInfo.blockStartBeat;
+				}
 				count = 0;
 			} 
 	  
@@ -160,7 +163,14 @@ function ProcessMIDI() {
 			}
 
 			// Holding for next sequence event
-			if (nextBeat >= musicInfo.blockStartBeat && nextBeat < musicInfo.blockEndBeat){
+			var lookAhead = nextBeat + SUBDIVISIONS - SWING;
+			if (musicInfo.cycling){
+				cycleBeats = musicInfo.rightCycleBeat - musicInfo.leftCycleBeat;
+			}
+			if (nextBeat < musicInfo.blockEndBeat){
+				if (musicInfo.cycling & lookAhead > musicInfo.rightCycleBeat) {
+					nextBeat -= cycleBeats;
+				}
 				stepPlayed = false;
 			}
 
@@ -168,7 +178,7 @@ function ProcessMIDI() {
 			// STOPPED - reset midi and counters
 			MIDI.allNotesOff();
 			nextBeat = 1;
-			count = 0;
+			count = 1000;
 		}
 }
 
@@ -314,7 +324,7 @@ PluginParameters.push({name:"Midi Input", type:"checkbox",
 // Voice Controls
 for (var i = 0; i < NUMBER_OF_VOICES; i++) {
 	var voiceNumber = i + 1;
-	PluginParameters.push({name:"----------  MIDIBOT #" + (i+1) + " ------------", type:"text"});
+	PluginParameters.push({name:"    MIDIBOT 1.06         robby kilgore", type:"text"});
 			
 	PluginParameters.push({name:"Root", type:"menu", 
 		valueStrings:ROOT_NOTES, defaultValue:60});
