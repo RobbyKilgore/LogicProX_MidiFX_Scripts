@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // 	MidiBot ===================  24-FEB-2018
-//		Build: 1.06
+//		Build: 1.06b
 //
 //		A Logic/MainStage MIDI FX 'Scripter' hack
 //		robbykilgore.com
@@ -49,12 +49,11 @@ var divisionBeats = [
 		1.333, 2, 3       // 1/2t, 1/2, 1/2d
 	];
 var SUBDIVISIONS = divisionBeats[1]; // Change the basic subdivision. Indexed from devisionBeats array (above)
-var swingDistance = 0;
 var SWING_PERCENT = 0;
 var SWING = 0;
 
 // INITS
-ResetParameterDefaults = true;
+// ResetParameterDefaults = true;
 var PluginParameters = [];
 var NeedsTimingInfo = true;
 var MIDI_NOTE = [];
@@ -98,36 +97,33 @@ var nextBeat = 1;
 var count = 1000;
 
 
-// RESET
-function Reset() {
-	ResetParameterDefaults = true;
-}
-
-
 // HANDLE MIDI INPUT
 function HandleMIDI(event){
-
-	// If Midi Input is enabled, update parameter
 	if (GetParameter("Midi Input") == 1) {
-
 		SetParameter(5, event.pitch); // Midi Note slider
-
 	}
-	
 } 
 
 
 // PROCESS MIDI - MAIN LOOP
 function ProcessMIDI() {
 
-	var musicInfo = GetTimingInfo();    
+	var musicInfo = GetTimingInfo();
+	var blockStart = musicInfo.blockStartBeat;
+	var blockEnd = musicInfo.blockEndBeat
+	var rightCycle = musicInfo.rightCycleBeat;
+	var leftCycle = musicInfo.leftCycleBeat;
+	var cycleBeats = 0;	
+	var cycleBeats = rightCycle - leftCycle;
+	var lookAhead = 0; 
 
 	  if (musicInfo.playing) {
 
 			// LOOP LENGTH
 			if (count > PATTERN_LENGTH - 1) {
 				if (count==1000){
-					nextBeat = musicInfo.blockStartBeat;
+					1 < blockStart ? nextBeat = blockStart : nextBeat = 1
+					Trace(nextBeat);
 				}
 				count = 0;
 			} 
@@ -148,29 +144,27 @@ function ProcessMIDI() {
 				if(count%2){
 
 					// Unswung Beats
-					nextBeat = (nextBeat + SUBDIVISIONS - SWING);
+					nextBeat += SUBDIVISIONS - SWING;
 
 				}else{
 
 					// Swung beats
-					nextBeat = (nextBeat + SUBDIVISIONS + SWING);
+					nextBeat += SUBDIVISIONS + SWING;
 
 				}
-
+				//Trace(SWING)
 				count += 1;
 				stepPlayed = true;
 
 			}
 
 			// Holding for next sequence event
-			var lookAhead = nextBeat + SUBDIVISIONS - SWING;
-			if (musicInfo.cycling){
-				cycleBeats = musicInfo.rightCycleBeat - musicInfo.leftCycleBeat;
-			}
-			if (nextBeat < musicInfo.blockEndBeat){
-				if (musicInfo.cycling & lookAhead > musicInfo.rightCycleBeat) {
+			lookAhead = nextBeat + SUBDIVISIONS - SWING;
+			if (nextBeat < blockEnd){
+				if (musicInfo.cycling && lookAhead > rightCycle) {
 					nextBeat -= cycleBeats;
 				}
+				Trace(nextBeat)
 				stepPlayed = false;
 			}
 
@@ -230,6 +224,7 @@ function ParameterChanged(param, value) {
 
 	// which voice is it?
 	var voiceIndex = parseInt((param % 14 == 0) ? param / 14 : (param - 1) / 14);
+	var swingDistance=0;
 
   switch (param % 14) {
 
@@ -324,7 +319,7 @@ PluginParameters.push({name:"Midi Input", type:"checkbox",
 // Voice Controls
 for (var i = 0; i < NUMBER_OF_VOICES; i++) {
 	var voiceNumber = i + 1;
-	PluginParameters.push({name:"    MIDIBOT 1.06         robby kilgore", type:"text"});
+	PluginParameters.push({name:"    MIDIBOT 1.06b        robby kilgore", type:"text"});
 			
 	PluginParameters.push({name:"Root", type:"menu", 
 		valueStrings:ROOT_NOTES, defaultValue:60});
@@ -401,5 +396,5 @@ function buildScale(root,range,modality){
 			}  
 		}    
 	}
-	return availableNotes;
+	return(availableNotes);
 }
