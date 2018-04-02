@@ -10,12 +10,15 @@ A midi input processor that rotates among various programmable harmonies. Origin
 # VST/AU plugin version
 MidiRotator 1.01
 MAC version
-Place the correct version in either of the following...
-  ${home}/Library/Audio/Plug-Ins/Component
-  ${home}/Library/Audio/Plug-Ins/VST
-Contact: midirotator via gmail.
+Place the correct version in either of the following...  
+
+${home}/Library/Audio/Plug-Ins/Component
+
+${home}/Library/Audio/Plug-Ins/VST
+
 
 # PC version coming soon
 
+Contact: midirotator via gmail.
 Have Fun,
 Robby Kilgore - Feb 2018
