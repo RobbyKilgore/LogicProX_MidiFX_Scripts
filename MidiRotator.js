@@ -88,7 +88,7 @@ function HandleMIDI(event) {
 	}
 	
 	// pass non-note events through
-	else {
+	else if (event.send) {
       event.send();
     }
 }
